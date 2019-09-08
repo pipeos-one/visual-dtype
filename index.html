@@ -14,13 +14,25 @@
   <script>
 var colored = false;
 var color = 998;
+var known_types = {
+  uint: true,
+  uint256: true,
+  string: true,
+  bytes: true,
+  bytes32: true,
+  dtype0: true
+}
 
 
 Blockly.Blocks['dtype_value'] = {
   init: function() {
+    var validator = function(newValue) {
+      if (!known_types[newValue]) return null;
+      return newValue;
+    };
     this.appendValueInput("NAME")
         .setCheck("String")
-        .appendField(new Blockly.FieldTextInput("uint256"), "NAME")
+        .appendField(new Blockly.FieldTextInput("uint256", validator), "TYPENAME")
         .appendField(new Blockly.FieldTextInput("label"), "LABEL")
         .appendField("Ref")
         .appendField(new Blockly.FieldCheckbox("FALSE"), "REL");
@@ -35,10 +47,16 @@ Blockly.Blocks['dtype_value'] = {
 
 Blockly.Blocks['dtype_array'] = {
   init: function() {
+    var validator = function(newValue) {
+      if (newValue == "") return "";
+      var num = parseInt(newValue)
+      if (!num) return null;
+      return num;
+    };
     this.appendValueInput("NAME")
         .setCheck("String")
         .appendField("[")
-        .appendField(new Blockly.FieldTextInput(""), "NAME")
+        .appendField(new Blockly.FieldTextInput("", validator), "NAME")
         .appendField("]");
     this.setInputsInline(false);
     this.setOutput(true, "String");
@@ -101,7 +119,7 @@ Blockly.Dtype['dtype_op'] = function(block) {
 };
 
 Blockly.Dtype['dtype_value'] = function(block) {
-  var text_name = block.getFieldValue('NAME');
+  var text_name = block.getFieldValue('TYPENAME');
   var text_label = block.getFieldValue('LABEL');
   var checkbox_rel = block.getFieldValue('REL') == 'TRUE';
   var value_name = Blockly.Dtype.valueToCode(block, 'NAME', Blockly.Dtype.ORDER_ATOMIC);
@@ -146,11 +164,15 @@ function noPara(str){
     var text_type = block.getFieldValue('TYPE');
     var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
 
+    var typess = ["",""]
+    if (value_name) typess = value_name.split("ˆ")
+    console.log(typess)
+
 
     
     // TODO: Assemble JavaScript into code variable.
-    var code = "types[\""+text_type+'\"] = { \"name\": \"'+text_type
-      +'\",'+' "types": ['+noPara(value_name)+'], "optionals": '+JSON.stringify(optionals)+', "outputs": [], "lang": 0, "typeChoice": 0, "contractAddress": "0x0000000000000000000000000000000000000000", "source": "0x0000000000000000000000000000000000000000000000000000000000000000"};\n';
+    var code = "known_types[\""+text_type+'\"] = { \"name\": \"'+text_type
+      +'\",'+' "types": ['+noPara(typess[0])+'], "optionals": ['+noPara(typess[1])+'], "outputs": [], "lang": 0, "typeChoice": 0, "contractAddress": "TBD in the next step", "source": "TBD in the next step"};\n';
     return code;
   };
   
@@ -158,40 +180,35 @@ function noPara(str){
     var value_op0 = Blockly.JavaScript.valueToCode(block, 'op0', Blockly.JavaScript.ORDER_ATOMIC);
     var dropdown_op = block.getFieldValue('op');
     var value_op1 = Blockly.JavaScript.valueToCode(block, 'op1', Blockly.JavaScript.ORDER_ATOMIC);
-    // switch (dropdown_op) {
-    //   case "*":
-    //     types.push(
-    //       {
-    //         name: noPara(value_op0),
-    //         label: noPara(value_op0),
-    //         relation: 0,
-    //         dimensions: dimensions[noPara(value_op0)]
-    //       },
-    //       {
-    //         name: noPara(value_op1),
-    //         label: noPara(value_op1),
-    //         relation: 0,
-    //         dimensions: dimensions[noPara(value_op1)]
-    //       });
-    //     break;
-    //   case "+":
-    //     break;
-    //   case "|":
-    //     optionals.push(noPara(value_op0), noPara(value_op1));
-    //     break;
+    var code1 = "";
+    var code2 = "";
+    switch (dropdown_op) {
+      case "*":
+        code1 = value_op0+", "+value_op1;
+        break;
+      case "+":
+        code1 = "TBD:)";
+        break;
+      case "|":
+        code1 = ", "+value_op0;
+        code2 = value_op1+", ";
+        break;
       
-    // }
+    }
     // TODO: Assemble JavaScript into code variable.
-    var code = value_op0+", "+value_op1;
+    //var code = value_op0+", "+value_op1;
     // TODO: Change ORDER_NONE to the correct strength.
-    return [code, Blockly.JavaScript.ORDER_NONE];
+    return [code1+"ˆ"+code2, Blockly.JavaScript.ORDER_NONE];
   };
   
   Blockly.JavaScript['dtype_value'] = function(block) {
-    var text_name = block.getFieldValue('NAME');
+    var text_name = block.getFieldValue('TYPENAME');
     var text_label = block.getFieldValue('LABEL');
     var checkbox_rel = block.getFieldValue('REL') == 'TRUE';
     var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
+
+    //var change = Blockly.Events.BLOCK_CHANGE
+    //console.log(change)
   
     // TODO: Assemble JavaScript into code variable.
     var code = { name: text_name, label: text_label, dimensions: JSON.parse("["+noPara(value_name)+"]"), relation: checkbox_rel? 1:0 }
@@ -232,7 +249,12 @@ function noPara(str){
     }
     #code, #jcode {
       height: 100%;
-      width: 40%;
+      width: 35%;
+    }
+
+    #dlist {
+      height: 100%;
+      width: 20%;
     }
 
 
@@ -259,7 +281,8 @@ function noPara(str){
         <td>
           <textarea id="code" ></textarea>
           <textarea id="jcode" ></textarea>
-          <button id="run" onclick="run();">Run</button>
+          <textarea id="dlist" ></textarea>
+          <button id="run" onclick="run();">+</button>
         </td>
       </tr>
 
@@ -309,18 +332,22 @@ function noPara(str){
       code = code.replace(/\(/g,"")
       code = code.replace(/\)/g,"")
       document.getElementById('code').value = code;
-      document.getElementById('jcode').value = "let types = {};\n"+jcode+"\nalert(JSON.stringify(types));\n";
+      document.getElementById('jcode').value = ""+jcode+"\nalert(JSON.stringify(known_types));\n";
 }
 demoWorkspace.addChangeListener(myUpdateFunction);
 
 function run(){
   var code = Blockly.JavaScript.workspaceToCode(demoWorkspace);
-  code = "let types = {};\n"+code+"\nalert(JSON.stringify(types));\n";
+  //code = "let types = {};\n"+code+"\nalert('dType Definitions:\n'+JSON.stringify(types));\n";
+  code = ""+code+"\nalert(JSON.stringify(known_types));\n";
   try {
     eval(code);
   } catch (e) {
     alert(e);
   }
+
+
+  updateD()
 }
 
 function xml(){
@@ -335,7 +362,28 @@ function fxml(str){
 Blockly.Xml.domToWorkspace(xml, demoWorkspace);
 }
 
-fxml('<xml xmlns="https://developers.google.com/blockly/xml"><block type="dtype_def" id="LvPrTmCG*)7_^wtJ6kx7" x="4" y="5"><field name="NAME">Let</field><field name="TYPE">dtype1</field><field name="AS">be:</field><value name="NAME"><block type="dtype_op" id="p+9aSxUdy{k6|$$ia2H@"><field name="op">*</field><value name="op0"><block type="dtype_value" id="s*6EFCVm4d1dcp9r~2,="><field name="NAME">uint256</field><field name="LABEL">label</field><field name="REL">TRUE</field><value name="NAME"><block type="dtype_array" id="-*1ChYO4PLx5]:7J@aU`"><field name="NAME">9</field></block></value></block></value><value name="op1"><block type="dtype_op" id="Q8FwqtXojppAlx5,-JMP"><field name="op">*</field><value name="op0"><block type="dtype_value" id="+Pv9A6*`SZH40gItwQFm"><field name="NAME">uint256</field><field name="LABEL">label2</field><field name="REL">FALSE</field><value name="NAME"><block type="dtype_array" id="}*|Y(1GA*qyM+VR(PcfE"><field name="NAME">7</field></block></value></block></value><value name="op1"><block type="dtype_value" id="?N^W2*Y7CP$vA9h@E2%#"><field name="NAME">dtype0</field><field name="LABEL">label3</field><field name="REL">TRUE</field><value name="NAME"><block type="dtype_array" id="4Kg=^_Mu6rbfn#m-=NXW"><field name="NAME"/></block></value></block></value></block></value></block></value></block></xml>');
+fxml('<xml xmlns="https://developers.google.com/blockly/xml"><block type="dtype_def" id="LvPrTmCG*)7_^wtJ6kx7" x="4" y="5"><field name="NAME">Let</field><field name="TYPE">dtype1</field><field name="AS">be:</field><value name="NAME"><block type="dtype_op" id="p+9aSxUdy{k6|$$ia2H@"><field name="op">*</field><value name="op0"><block type="dtype_value" id="s*6EFCVm4d1dcp9r~2,="><field name="TYPENAME">uint256</field><field name="LABEL">label</field><field name="REL">TRUE</field><value name="NAME"><block type="dtype_array" id="-*1ChYO4PLx5]:7J@aU`"><field name="NAME">9</field></block></value></block></value><value name="op1"><block type="dtype_op" id="Q8FwqtXojppAlx5,-JMP"><field name="op">*</field><value name="op0"><block type="dtype_value" id="+Pv9A6*`SZH40gItwQFm"><field name="TYPENAME">uint256</field><field name="LABEL">label2</field><field name="REL">FALSE</field><value name="NAME"><block type="dtype_array" id="}*|Y(1GA*qyM+VR(PcfE"><field name="NAME">7</field></block></value></block></value><value name="op1"><block type="dtype_value" id="?N^W2*Y7CP$vA9h@E2%#"><field name="TYPENAME">dtype0</field><field name="LABEL">label3</field><field name="REL">TRUE</field><value name="NAME"><block type="dtype_array" id="4Kg=^_Mu6rbfn#m-=NXW"><field name="NAME"/></block></value></block></value></block></value></block></value></block></xml>');
+
+function updateD(){
+  out =""
+  for (el in known_types){
+    out = out+el+"\n"
+  }
+  document.getElementById("dlist").innerHTML =out
+}
+
+updateD()
+
+
+function onFirstComment(event) {
+  // && !event.oldValue && event.newValue
+  if (event.type == Blockly.Events.CHANGE && event.name == "TYPENAME") {
+    //alert('Congratulations on creating your first comment!')
+    console.log(event)
+    //workspace.removeChangeListener(onFirstComment);
+  }
+}
+demoWorkspace.addChangeListener(onFirstComment);
   </script>
 </body>
 </html>
