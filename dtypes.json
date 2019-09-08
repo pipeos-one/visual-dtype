@@ -10,6 +10,16 @@
         "outputs": []
     },
     {
+        "name": "bytes",
+        "types": [],
+        "lang": 0,
+        "typeChoice": 0,
+        "contractAddress": "0x0000000000000000000000000000000000000000",
+        "source": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "optionals": [],
+        "outputs": []
+    },
+    {
         "name": "bool",
         "types": [],
         "lang": 0,
@@ -990,45 +1000,13 @@
         "outputs": []
     },
     {
-        "name": "Balance",
-        "types": [
-            {"name": "uint256", "label": "balance", "relation":0, "dimensions":[]}
-        ],
+        "name": "dtype0",
+        "types": [],
         "lang": 0,
         "typeChoice": 0,
         "contractAddress": "0x0000000000000000000000000000000000000000",
         "source": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "optionals": [],
         "outputs": []
-    },
-    {
-        "name": "name",
-        "types": [
-            {"name": "string", "label": "firstName", "relation":0, "dimensions":[]},
-            {"name": "string", "label": "lastName", "relation":0, "dimensions":[]}
-        ],
-        "lang": 0,
-        "isEvent": false,
-        "typeChoice": 0,
-        "contractAddress": "0x0000000000000000000000000000000000000000",
-        "source": "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "optionals": [],
-        "outputs": []
-    },
-    {
-        "name": "add",
-        "types": [
-            {"name": "uint256", "label": "a", "relation":0, "dimensions":[]},
-            {"name": "uint256", "label": "b", "relation":0, "dimensions":[]}
-        ],
-        "lang": 0,
-        "typeChoice": 4,
-        "contractAddress": "0x0000000000000000000000000000000000000000",
-        "source": "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "optionals": [],
-        "outputs": [],
-        "outputs": [
-            {"name": "uint256", "label": "result", "relation":0, "dimensions":[]}
-        ]
     }
 ]
