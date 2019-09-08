@@ -3,6 +3,10 @@
 <head>
   <meta charset="utf-8">
   <title>Visual dType</title>
+  <script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
   <script src="libs/blockly/blockly_compressed.js"></script>
   <script src="libs/blockly/blocks_compressed.js"></script>
   <script src="libs/blockly/dtype_compressed.js"></script>
@@ -14,14 +18,15 @@
   <script>
 var colored = false;
 var color = 998;
-var known_types = {
-  uint: true,
-  uint256: true,
-  string: true,
-  bytes: true,
-  bytes32: true,
-  dtype0: true
-}
+var known_types = {} ;
+
+jQuery.getJSON("dtypes.json",function(data){
+  data.forEach(element => {
+    known_types[element.name] = element
+  });
+  console.log(data)
+  updateD()
+})
 
 
 Blockly.Blocks['dtype_value'] = {
@@ -366,13 +371,14 @@ fxml('<xml xmlns="https://developers.google.com/blockly/xml"><block type="dtype_
 
 function updateD(){
   out =""
+  console.log(known_types)
   for (el in known_types){
     out = out+el+"\n"
   }
   document.getElementById("dlist").innerHTML =out
 }
 
-updateD()
+
 
 
 function onFirstComment(event) {
