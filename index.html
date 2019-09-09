@@ -341,14 +341,14 @@ function noPara(str){
       code = code.replace(/\(/g,"")
       code = code.replace(/\)/g,"")
       document.getElementById('code').value = code;
-      document.getElementById('jcode').value = ""+jcode+"\nalert(JSON.stringify(known_types));\n";
+      document.getElementById('jcode').value = ""+jcode+"";
 }
 demoWorkspace.addChangeListener(myUpdateFunction);
 
 function run(){
   var code = Blockly.JavaScript.workspaceToCode(demoWorkspace);
   //code = "let types = {};\n"+code+"\nalert('dType Definitions:\n'+JSON.stringify(types));\n";
-  code = ""+code+"\nalert(JSON.stringify(known_types));\n";
+  code = ""+code+"";
   try {
     eval(code);
   } catch (e) {
